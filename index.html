@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>你這輩子要花多少錢？人生花費試算表</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #ffffff;
+    --bg-secondary: #f5f5f4;
+    --bg-info: #e6f1fb;
+    --bg-warning: #faeeda;
+    --text: #1a1a1a;
+    --text-secondary: #6b6b6b;
+    --text-tertiary: #9d9d9d;
+    --text-info: #185fa5;
+    --text-warning: #854f0b;
+    --border: rgba(0,0,0,0.12);
+    --border-secondary: rgba(0,0,0,0.22);
+    --border-info: #b5d4f4;
+    --border-warning: #fac775;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --red: #E24B4A;
+    --navy: #042C53;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1c1e;
+      --bg-secondary: #2c2c2e;
+      --bg-info: #0c2a45;
+      --bg-warning: #3a2200;
+      --text: #f0f0f0;
+      --text-secondary: #a0a0a0;
+      --text-tertiary: #6b6b6b;
+      --text-info: #85b7eb;
+      --text-warning: #fac775;
+      --border: rgba(255,255,255,0.10);
+      --border-secondary: rgba(255,255,255,0.20);
+      --border-info: #185fa5;
+      --border-warning: #854f0b;
+    }
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-secondary);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem 1rem 4rem;
+  }
+
+  .container {
+    max-width: 680px;
+    margin: 0 auto;
+    background: var(--bg);
+    border-radius: var(--radius-lg);
+    border: 0.5px solid var(--border);
+    overflow: hidden;
+  }
+
+  /* Header */
+  .header {
+    background: var(--navy);
+    padding: 2rem 1.5rem 1.75rem;
+    text-align: center;
+  }
+  .header-badge {
+    display: inline-block;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #85b7eb;
+    margin-bottom: 0.75rem;
+  }
+  .header h1 {
+    font-size: 22px;
+    font-weight: 500;
+    color: #ffffff;
+    line-height: 1.3;
+    margin-bottom: 0.5rem;
+  }
+  .header p {
+    font-size: 13px;
+    color: #b5d4f4;
+    line-height: 1.6;
+  }
+
+  /* Hero total */
+  .hero {
+    text-align: center;
+    padding: 1.75rem 1rem 1.5rem;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .hero-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  .hero-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 52px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1;
+    transition: color 0.3s;
+  }
+  .hero-number.shock { color: var(--red); }
+  .hero-sub {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    margin-top: 0.5rem;
+  }
+
+  /* Body padding */
+  .body { padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
+
+  /* Section card */
+  .section {
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .section-head {
+    padding: 11px 16px;
+    background: var(--bg-secondary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .section-title { font-size: 14px; font-weight: 500; }
+  .section-total {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+  .section-body { padding: 12px 16px; display: flex; flex-direction: column; gap: 10px; }
+
+  .row { display: grid; grid-template-columns: 1fr 120px 88px; gap: 8px; align-items: center; }
+  .row-label { font-size: 13px; color: var(--text-secondary); line-height: 1.4; }
+  .row-hint { font-size: 11px; color: var(--text-tertiary); margin-top: 1px; }
+  .row-result {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    text-align: right;
+    color: var(--text-tertiary);
+  }
+
+  input[type=number] {
+    width: 100%;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    text-align: right;
+    padding: 6px 9px;
+    border: 0.5px solid var(--border-secondary);
+    border-radius: var(--radius-md);
+    background: var(--bg);
+    color: var(--text);
+    -moz-appearance: textfield;
+  }
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+  input[type=number]:focus { outline: none; border-color: #378ADD; box-shadow: 0 0 0 3px rgba(55,138,221,0.12); }
+
+  .divider { height: 0.5px; background: var(--border); margin: 2px 0; }
+  .kid-note { font-size: 11px; color: var(--text-tertiary); line-height: 1.6; padding: 4px 0; }
+
+  /* Summary */
+  .summary {
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .summary-head {
+    padding: 11px 16px;
+    background: var(--bg-secondary);
+    font-size: 14px;
+    font-weight: 500;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .summary-body { padding: 12px 16px; display: flex; flex-direction: column; gap: 7px; }
+  .summary-row { display: flex; justify-content: space-between; font-size: 13px; }
+  .summary-row .cat { color: var(--text-secondary); }
+  .summary-row .val { font-family: 'JetBrains Mono', monospace; }
+  .summary-row.total {
+    font-size: 15px;
+    font-weight: 500;
+    border-top: 0.5px solid var(--border);
+    padding-top: 10px;
+    margin-top: 4px;
+  }
+  .summary-row.small { font-size: 12px; }
+  .summary-row.small .cat { color: var(--text-tertiary); }
+  .summary-row.small .val { color: var(--text-secondary); font-size: 12px; }
+
+  /* Savings section */
+  .savings {
+    border: 2px solid var(--border-info);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    display: none;
+  }
+  .savings-head {
+    padding: 11px 16px;
+    background: var(--bg-info);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-info);
+    border-bottom: 0.5px solid var(--border-info);
+  }
+  .savings-body { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+  .savings-intro { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+  .selects-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .select-group { display: flex; flex-direction: column; gap: 5px; }
+  .select-group label { font-size: 12px; color: var(--text-secondary); }
+  .select-group select {
+    font-size: 13px;
+    padding: 7px 10px;
+    border: 0.5px solid var(--border-secondary);
+    border-radius: var(--radius-md);
+    background: var(--bg);
+    color: var(--text);
+    cursor: pointer;
+  }
+  .select-group select:focus { outline: none; border-color: #378ADD; }
+
+  .result-box {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    padding: 20px 16px;
+    text-align: center;
+  }
+  .result-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; }
+  .result-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 40px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1;
+  }
+  .result-unit { font-size: 13px; color: var(--text-secondary); margin-top: 6px; }
+  .formula-text { font-size: 12px; color: var(--text-tertiary); text-align: center; }
+
+  .insight-box {
+    background: var(--bg-warning);
+    border: 0.5px solid var(--border-warning);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    font-size: 13px;
+    color: var(--text-warning);
+    line-height: 1.6;
+    display: none;
+  }
+
+  /* CTA */
+  .cta {
+    background: var(--navy);
+    border-radius: var(--radius-lg);
+    padding: 2rem 1.5rem;
+    text-align: center;
+    display: none;
+  }
+  .cta-eyebrow { font-size: 11px; color: #85b7eb; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.75rem; }
+  .cta-headline { font-size: 20px; font-weight: 500; color: #ffffff; line-height: 1.3; margin-bottom: 0.75rem; }
+  .cta-amount { color: #fac775; }
+  .cta-body { font-size: 13px; color: #b5d4f4; line-height: 1.7; margin-bottom: 1.5rem; }
+  .cta-btn {
+    display: inline-block;
+    background: #fac775;
+    color: var(--navy);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 12px 28px;
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .cta-btn:hover { opacity: 0.88; }
+  .cta-disclaimer {
+    font-size: 11px;
+    color: #378ADD;
+    margin-top: 1rem;
+  }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 1.5rem;
+    font-size: 12px;
+    color: var(--text-tertiary);
+    border-top: 0.5px solid var(--border);
+  }
+
+  @media (max-width: 480px) {
+    body { padding: 0; }
+    .container { border-radius: 0; border: none; }
+    .row { grid-template-columns: 1fr 100px 72px; }
+    .hero-number { font-size: 40px; }
+    .result-number { font-size: 32px; }
+    .selects-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-badge">自由黑客 × 人生財務試算</div>
+    <h1>你這輩子要花多少錢？</h1>
+    <p>填入你的生活數字，算出人生總花費與每月該存多少——大多數人看完都嚇到了。</p>
+  </div>
+
+  <!-- Hero 累加總額 -->
+  <div class="hero">
+    <div class="hero-label">人生預計花費總額</div>
+    <div class="hero-number" id="grand-total">$0</div>
+    <div class="hero-sub">單位：萬元新台幣</div>
+  </div>
+
+  <div class="body">
+
+    <!-- 生活費 -->
+    <div class="section">
+      <div class="section-head">
+        <span class="section-title">🧾 生活費</span>
+        <span class="section-total" id="t-living">—</span>
+      </div>
+      <div class="section-body">
+        <div class="row">
+          <div><div class="row-label">每日餐費</div><div class="row-hint">× 365天 × 50年</div></div>
+          <input type="number" id="food-daily" placeholder="400" min="0" oninput="calc()">
+          <div class="row-result" id="r-food">—</div>
+        </div>
+        <div class="divider"></div>
+        <div class="row">
+          <div><div class="row-label">每月娛樂費</div><div class="row-hint">× 12月 × 50年</div></div>
+          <input type="number" id="ent-month" placeholder="3000" min="0" oninput="calc()">
+          <div class="row-result" id="r-ent">—</div>
+        </div>
+        <div class="divider"></div>
+        <div class="row">
+          <div><div class="row-label">每月通訊費</div><div class="row-hint">× 12月 × 50年</div></div>
+          <input type="number" id="comm-month" placeholder="1000" min="0" oninput="calc()">
+          <div class="row-result" id="r-comm">—</div>
+        </div>
+        <div class="divider"></div>
+        <div class="row">
+          <div><div class="row-label">每月治裝費</div><div class="row-hint">× 12月 × 50年</div></div>
+          <input type="number" id="cloth-month" placeholder="2000" min="0" oninput="calc()">
+          <div class="row-result" id="r-cloth">—</div>
+        </div>
+        <div class="divider"></div>
+        <div class="row">
+          <div><div class="row-label">3C 換機費用</div><div class="row-hint">每年一次 × 50年</div></div>
+          <input type="number" id="gadget-yr" placeholder="10000" min="0" oninput="calc()">
+          <div class="row-result" id="r-gadget">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 房屋 -->
+    <div class="section">
+      <div class="section-head">
+        <span class="section-title">🏠 房屋住宿費</span>
+        <span class="section-total" id="t-housing">—</span>
+      </div>
+      <div class="section-body">
+        <div class="row">
+          <div><div class="row-label">每月房租／房貸</div><div class="row-hint">× 12月 × 50年</div></div>
+          <input type="number" id="rent-month" placeholder="8000" min="0" oninput="calc()">
+          <div class="row-result" id="r-rent">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 交通 -->
+    <div class="section">
+      <div class="section-head">
+        <span class="section-title">🚗 交通費</span>
+        <span class="section-total" id="t-transport">—</span>
+      </div>
+      <div class="section-body">
+        <div class="row">
+          <div><div class="row-label">買車次數</div><div class="row-hint">每次 40萬估算</div></div>
+          <input type="number" id="car-times" placeholder="4" min="0" oninput="calc()">
+          <div class="row-result" id="r-car">—</div>
+        </div>
+        <div class="divider"></div>
+        <div class="row">
+          <div><div class="row-label">每月油錢／停車</div><div class="row-hint">× 12月 × 40年</div></div>
+          <input type="number" id="gas-month" placeholder="2000" min="0" oninput="calc()">
+          <div class="row-result" id="r-gas">—</div>
+        </div>
+        <div class="divider"></div>
+        <div class="row">
+          <div><div class="row-label">每年旅遊費</div><div class="row-hint">× 40年</div></div>
+          <input type="number" id="travel-yr" placeholder="11000" min="0" oninput="calc()">
+          <div class="row-result" id="r-travel">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 孩子 -->
+    <div class="section">
+      <div class="section-head">
+        <span class="section-title">👶 孩子花費</span>
+        <span class="section-total" id="t-kids">—</span>
+      </div>
+      <div class="section-body">
+        <div class="row">
+          <div><div class="row-label">孩子人數</div><div class="row-hint">自動套用各項費用</div></div>
+          <input type="number" id="kids-count" placeholder="1" min="0" max="5" oninput="calc()">
+          <div class="row-result" id="r-kids">—</div>
+        </div>
+        <div class="kid-note">每個孩子估算：保母費 48萬＋幼兒園 6萬＋國小到高中 12萬＋大學 24萬＋補習費 12萬＋生活費 138萬＝共 240萬</div>
+      </div>
+    </div>
+
+    <!-- 保險醫療 -->
+    <div class="section">
+      <div class="section-head">
+        <span class="section-title">🏥 保險 &amp; 醫療</span>
+        <span class="section-total" id="t-health">—</span>
+      </div>
+      <div class="section-body">
+        <div class="row">
+          <div><div class="row-label">每月保費</div><div class="row-hint">× 12月 × 50年</div></div>
+          <input type="number" id="ins-month" placeholder="700" min="0" oninput="calc()">
+          <div class="row-result" id="r-ins">—</div>
+        </div>
+        <div class="divider"></div>
+        <div class="row">
+          <div><div class="row-label">大病醫療備用（次）</div><div class="row-hint">每次 10萬估算</div></div>
+          <input type="number" id="med-times" placeholder="2" min="0" oninput="calc()">
+          <div class="row-result" id="r-med">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 結婚孝養 -->
+    <div class="section">
+      <div class="section-head">
+        <span class="section-title">💒 結婚 &amp; 孝養父母</span>
+        <span class="section-total" id="t-family">—</span>
+      </div>
+      <div class="section-body">
+        <div class="row">
+          <div><div class="row-label">婚禮預算（元）</div><div class="row-hint">一次性費用</div></div>
+          <input type="number" id="wedding" placeholder="200000" min="0" oninput="calc()">
+          <div class="row-result" id="r-wedding">—</div>
+        </div>
+        <div class="divider"></div>
+        <div class="row">
+          <div><div class="row-label">每月孝養金</div><div class="row-hint">× 雙親 × 12月 × 20年</div></div>
+          <input type="number" id="filial-month" placeholder="5000" min="0" oninput="calc()">
+          <div class="row-result" id="r-filial">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 匯總 -->
+    <div class="summary">
+      <div class="summary-head">你的人生費用總覽</div>
+      <div class="summary-body">
+        <div class="summary-row"><span class="cat">生活費</span><span class="val" id="s-living">—</span></div>
+        <div class="summary-row"><span class="cat">房屋住宿</span><span class="val" id="s-housing">—</span></div>
+        <div class="summary-row"><span class="cat">交通費</span><span class="val" id="s-transport">—</span></div>
+        <div class="summary-row"><span class="cat">孩子花費</span><span class="val" id="s-kids">—</span></div>
+        <div class="summary-row"><span class="cat">保險 &amp; 醫療</span><span class="val" id="s-health">—</span></div>
+        <div class="summary-row"><span class="cat">結婚 &amp; 孝養</span><span class="val" id="s-family">—</span></div>
+        <div class="summary-row total"><span class="cat">🧮 總計</span><span class="val" id="s-total">請開始填寫</span></div>
+        <div class="summary-row small"><span class="cat">每年平均需要</span><span class="val" id="s-peryear">—</span></div>
+        <div class="summary-row small"><span class="cat">每月平均需要</span><span class="val" id="s-permonth">—</span></div>
+      </div>
+    </div>
+
+    <!-- 每月存款計算器 -->
+    <div class="savings" id="savings-section">
+      <div class="savings-head">📐 每月要存多少才夠？</div>
+      <div class="savings-body">
+        <div class="savings-intro">目標金額已自動帶入。選擇年限與預期報酬率，系統自動查表計算每月應存金額。</div>
+        <div class="selects-grid">
+          <div class="select-group">
+            <label>距離目標還有幾年？</label>
+            <select id="years-select" onchange="calcSavings()">
+              <option value="1">1 年</option>
+              <option value="2">2 年</option>
+              <option value="3">3 年</option>
+              <option value="4">4 年</option>
+              <option value="5">5 年</option>
+              <option value="6">6 年</option>
+              <option value="7">7 年</option>
+              <option value="8">8 年</option>
+              <option value="9">9 年</option>
+              <option value="10" selected>10 年</option>
+              <option value="11">11 年</option>
+              <option value="12">12 年</option>
+              <option value="13">13 年</option>
+              <option value="14">14 年</option>
+              <option value="15">15 年</option>
+              <option value="16">16 年</option>
+              <option value="17">17 年</option>
+              <option value="18">18 年</option>
+              <option value="19">19 年</option>
+              <option value="20">20 年</option>
+            </select>
+          </div>
+          <div class="select-group">
+            <label>預期年化報酬率</label>
+            <select id="rate-select" onchange="calcSavings()">
+              <option value="2">2%（定存）</option>
+              <option value="3">3%（保守）</option>
+              <option value="6">6%（穩健）</option>
+              <option value="8">8%（積極）</option>
+              <option value="10" selected>10%（美股歷史均值）</option>
+              <option value="12">12%（主動操作）</option>
+              <option value="15">15%（高成長）</option>
+            </select>
+          </div>
+        </div>
+        <div class="result-box">
+          <div class="result-label">你每個月需要存／投入</div>
+          <div class="result-number" id="monthly-save">—</div>
+          <div class="result-unit">元／月</div>
+        </div>
+        <div class="formula-text" id="formula-text">—</div>
+        <div class="insight-box" id="insight-box"></div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta" id="cta-box">
+      <div class="cta-eyebrow">下一步</div>
+      <div class="cta-headline">你需要 <span class="cta-amount" id="cta-amount"></span> 萬元<br>光存錢不夠用</div>
+      <div class="cta-body">
+        靠薪水存款，這輩子幾乎不可能湊到這個數字。<br>
+        美股長期年化報酬約 10%，是目前最多人用來縮短這段距離的方式。<br><br>
+        想知道怎麼開始？BOS 美股投資分享會免費參加，<br>
+        從零基礎教你用美股打造被動收入。
+      </div>
+      <a class="cta-btn" id="cta-link" href="https://buffettonlineschool.safechkout.net/t?orid=19055&opid=6" target="_blank" rel="noopener">
+        免費參加美股投資分享會 →
+      </a>
+      <div class="cta-disclaimer">免費活動 · 點擊後跳轉至 Buffett Online School 官方報名頁</div>
+    </div>
+
+  </div><!-- /body -->
+
+  <div class="footer">
+    數字僅供試算參考，實際花費因個人生活方式而異。<br>
+    由 <strong>自由黑客</strong> 製作
+  </div>
+</div>
+
+<script>
+var TABLE = {
+  1:  {2:0.0823,3:0.0822,6:0.0811,8:0.0803,10:0.0796,12:0.0788,15:0.0778},
+  2:  {2:0.0409,3:0.0405,6:0.0393,8:0.0386,10:0.0378,12:0.0371,15:0.0360},
+  3:  {2:0.027, 3:0.0266,6:0.0254,8:0.0247,10:0.0239,12:0.0232,15:0.0222},
+  4:  {2:0.02,  3:0.0196,6:0.0185,8:0.0177,10:0.017, 12:0.0163,15:0.0153},
+  5:  {2:0.0159,3:0.0155,6:0.0143,8:0.0136,10:0.0129,12:0.0122,15:0.0113},
+  6:  {2:0.0131,3:0.0127,6:0.0116,8:0.0109,10:0.0102,12:0.0096,15:0.0086},
+  7:  {2:0.0111,3:0.0107,6:0.0096,8:0.0089,10:0.0083,12:0.0077,15:0.0068},
+  8:  {2:0.0096,3:0.0092,6:0.0081,8:0.0075,10:0.0068,12:0.0063,15:0.0054},
+  9:  {2:0.0085,3:0.0081,6:0.007, 8:0.0064,10:0.0057,12:0.0052,15:0.0044},
+  10: {2:0.0075,3:0.0072,6:0.0061,8:0.0055,10:0.0049,12:0.0043,15:0.0036},
+  11: {2:0.0068,3:0.0064,6:0.0054,8:0.0047,10:0.0042,12:0.0037,15:0.0030},
+  12: {2:0.0062,3:0.0058,6:0.0048,8:0.0042,10:0.0036,12:0.0031,15:0.0025},
+  13: {2:0.0056,3:0.0052,6:0.0042,8:0.0037,10:0.0031,12:0.0027,15:0.0021},
+  14: {2:0.0052,3:0.0048,6:0.0038,8:0.0032,10:0.0027,12:0.0023,15:0.0018},
+  15: {2:0.0048,3:0.0044,6:0.0034,8:0.0029,10:0.0024,12:0.002, 15:0.0015},
+  16: {2:0.0044,3:0.0041,6:0.0031,8:0.0026,10:0.0021,12:0.0017,15:0.0013},
+  17: {2:0.0041,3:0.0038,6:0.0028,8:0.0023,10:0.0019,12:0.0015,15:0.0011},
+  18: {2:0.0039,3:0.0035,6:0.0026,8:0.0021,10:0.0017,12:0.0013,15:0.0009},
+  19: {2:0.0036,3:0.0033,6:0.0024,8:0.0019,10:0.0015,12:0.0012,15:0.0008},
+  20: {2:0.0034,3:0.0030,6:0.0022,8:0.0017,10:0.0013,12:0.0010,15:0.0007}
+};
+
+var grandWan = 0;
+
+function fmtWan(wan) {
+  if (wan === 0) return '0 萬';
+  return wan.toLocaleString('zh-TW') + ' 萬';
+}
+
+function calc() {
+  var t = {};
+
+  var foodDaily = +document.getElementById('food-daily').value || 0;
+  var rFood = Math.round(foodDaily * 365 * 50 / 10000);
+  var entMonth = +document.getElementById('ent-month').value || 0;
+  var rEnt = Math.round(entMonth * 12 * 50 / 10000);
+  var commMonth = +document.getElementById('comm-month').value || 0;
+  var rComm = Math.round(commMonth * 12 * 50 / 10000);
+  var clothMonth = +document.getElementById('cloth-month').value || 0;
+  var rCloth = Math.round(clothMonth * 12 * 50 / 10000);
+  var gadgetYr = +document.getElementById('gadget-yr').value || 0;
+  var rGadget = Math.round(gadgetYr * 50 / 10000);
+  set('r-food', rFood); set('r-ent', rEnt); set('r-comm', rComm);
+  set('r-cloth', rCloth); set('r-gadget', rGadget);
+  t.living = rFood + rEnt + rComm + rCloth + rGadget;
+  document.getElementById('t-living').textContent = fmtWan(t.living);
+
+  var rentMonth = +document.getElementById('rent-month').value || 0;
+  var rRent = Math.round(rentMonth * 12 * 50 / 10000);
+  set('r-rent', rRent);
+  t.housing = rRent;
+  document.getElementById('t-housing').textContent = fmtWan(t.housing);
+
+  var carTimes = +document.getElementById('car-times').value || 0;
+  var rCar = Math.round(carTimes * 40);
+  var gasMonth = +document.getElementById('gas-month').value || 0;
+  var rGas = Math.round(gasMonth * 12 * 40 / 10000);
+  var travelYr = +document.getElementById('travel-yr').value || 0;
+  var rTravel = Math.round(travelYr * 40 / 10000);
+  set('r-car', rCar); set('r-gas', rGas); set('r-travel', rTravel);
+  t.transport = rCar + rGas + rTravel;
+  document.getElementById('t-transport').textContent = fmtWan(t.transport);
+
+  var kidsCount = +document.getElementById('kids-count').value || 0;
+  var tKids = Math.round(kidsCount * 240);
+  set('r-kids', tKids);
+  t.kids = tKids;
+  document.getElementById('t-kids').textContent = fmtWan(t.kids);
+
+  var insMonth = +document.getElementById('ins-month').value || 0;
+  var rIns = Math.round(insMonth * 12 * 50 / 10000);
+  var medTimes = +document.getElementById('med-times').value || 0;
+  var rMed = Math.round(medTimes * 10);
+  set('r-ins', rIns); set('r-med', rMed);
+  t.health = rIns + rMed;
+  document.getElementById('t-health').textContent = fmtWan(t.health);
+
+  var wedding = +document.getElementById('wedding').value || 0;
+  var rWedding = Math.round(wedding / 10000);
+  var filialMonth = +document.getElementById('filial-month').value || 0;
+  var rFilial = Math.round(filialMonth * 2 * 12 * 20 / 10000);
+  set('r-wedding', rWedding); set('r-filial', rFilial);
+  t.family = rWedding + rFilial;
+  document.getElementById('t-family').textContent = fmtWan(t.family);
+
+  grandWan = t.living + t.housing + t.transport + t.kids + t.health + t.family;
+
+  document.getElementById('s-living').textContent = fmtWan(t.living);
+  document.getElementById('s-housing').textContent = fmtWan(t.housing);
+  document.getElementById('s-transport').textContent = fmtWan(t.transport);
+  document.getElementById('s-kids').textContent = fmtWan(t.kids);
+  document.getElementById('s-health').textContent = fmtWan(t.health);
+  document.getElementById('s-family').textContent = fmtWan(t.family);
+
+  var anyFilled = Object.values(t).some(function(v){ return v > 0; });
+
+  if (anyFilled) {
+    document.getElementById('s-total').textContent = fmtWan(grandWan);
+    document.getElementById('s-peryear').textContent = fmtWan(Math.round(grandWan / 50)) + '／年';
+    document.getElementById('s-permonth').textContent = fmtWan(Math.round(grandWan / 50 / 12)) + '／月';
+    var el = document.getElementById('grand-total');
+    el.textContent = fmtWan(grandWan);
+    el.className = 'hero-number' + (grandWan > 2000 ? ' shock' : '');
+    document.getElementById('savings-section').style.display = 'block';
+    document.getElementById('cta-box').style.display = 'block';
+    document.getElementById('cta-amount').textContent = grandWan.toLocaleString('zh-TW');
+    calcSavings();
+  } else {
+    document.getElementById('s-total').textContent = '請開始填寫';
+    document.getElementById('s-peryear').textContent = '—';
+    document.getElementById('s-permonth').textContent = '—';
+    document.getElementById('grand-total').textContent = '$0';
+    document.getElementById('grand-total').className = 'hero-number';
+    document.getElementById('savings-section').style.display = 'none';
+    document.getElementById('cta-box').style.display = 'none';
+  }
+}
+
+function set(id, wan) {
+  document.getElementById(id).textContent = wan ? fmtWan(wan) : '—';
+}
+
+function calcSavings() {
+  if (!grandWan) return;
+  var years = parseInt(document.getElementById('years-select').value);
+  var rate  = parseInt(document.getElementById('rate-select').value);
+  var factor = TABLE[years][rate];
+  var monthly = Math.round(grandWan * 10000 * factor);
+  document.getElementById('monthly-save').textContent = monthly.toLocaleString('zh-TW');
+  document.getElementById('formula-text').textContent =
+    grandWan.toLocaleString('zh-TW') + ' 萬 × ' + factor + ' = 每月 ' + monthly.toLocaleString('zh-TW') + ' 元';
+
+  var avgIncome = 40000;
+  var pct = Math.round(monthly / avgIncome * 100);
+  var box = document.getElementById('insight-box');
+  if (monthly > avgIncome * 0.8) {
+    box.style.display = 'block';
+    box.textContent = '⚠️ 這個金額超過一般月薪的 ' + pct + '%，純靠存款幾乎不可能達到。報酬率從 2% 提升到 10%，每月需存的金額可以減少超過一半——這正是投資的意義所在。';
+  } else if (monthly > avgIncome * 0.4) {
+    box.style.display = 'block';
+    box.textContent = '💡 這個金額佔一般月薪約 ' + pct + '%。若能搭配投資讓報酬率提升，每月的壓力可以大幅降低。';
+  } else {
+    box.style.display = 'none';
+  }
+}
+</script>
+
+</body>
+</html>
